@@ -3,16 +3,17 @@ pipeline {
   stages {
     stage('Build') {
       steps {
-        sh '''./mvnw package
-cp -r ./target ~/target'''
+        sh 'mvn test'
       }
     }
-    stage('Sonarqube Analysis') {
-      steps {
-        withSonarQubeEnv('static') {
-          sh './mvnw clean package sonar:sonar'
-        }
-      }
+    stage('SCM') {
+    checkout scm
+  }
+  stage('SonarQube Analysis') {
+    def mvn = tool 'Default Maven';
+    withSonarQubeEnv() {
+      sh "${mvn}/bin/mvn clean verify sonar:sonar -Dsonar.projectKey=calculator"
     }
+  }
   }
 }
